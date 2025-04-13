@@ -259,9 +259,9 @@
 
     /* initialize jsPsych */
     var jsPsych = initJsPsych({
-      // on_finish: function() {
-      //   jsPsych.data.displayData();
-      // },
+      on_finish: function() {
+        jsPsych.data.displayData();
+      },
       on_data_update: function(data) {
         data.subject_id = subject_id;  // Add subject ID to all trials
       }
@@ -694,7 +694,7 @@
       },
       choices: "NO_KEYS" // Disable key press responses
     };
-    // timeline.push(debrief_block);
+    timeline.push(debrief_block);
 
 
     /* start the experiment */
