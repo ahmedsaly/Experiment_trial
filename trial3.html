@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>jsPsych + Panolens Experiment</title>
+  <script src="https://unpkg.com/jspsych@8.2.1"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r105/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/panolens@0.12.0/build/panolens.min.js"></script>
+  <link href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css" rel="stylesheet" type="text/css" />
+
+  <style>
+    /* Main container styles */
+    #jspsych-target {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      /* padding: 1vh; */
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    /* Panorama view */
+    #panorama {
+      width: 70vw;
+      height: 50vh;  /* Slightly reduced height */
+      margin: 1vh auto;
+      max-width: 1000px;
+      flex: 0 0 auto;
+    }
+
+    /* Next View button */
+    #nextViewBtn {
+      /* margin: 1vh auto; */
+      flex: 0 0 auto;
+    }
+
+    /* Submit button */
+    #submitBtn {
+      margin: 1vh auto;
+      flex: 0 0 auto;
+    }
+
+    /* Message container adjustments */
+    .message-container {
+      display: none;
+      padding: 0.5vh 0.5vw;
+      margin: 0.5vh auto;
+      border-radius: 5px;
+      text-align: center;
+      font-size: calc(10px + 0.3vw);
+      font-weight: bold;
+      width: fit-content;  /* Fit to content */
+      max-width: 80vw;
+      flex: 0 0 auto;
+    }
+
+    /* Confirmation buttons container */
+    .confirm-buttons {
+      margin-top: 1vh;
+      display: flex;
+      gap: 1vw;
+      justify-content: center;
+    }
+
+    /* Layout container adjustments */
+    #layout-container {
+      margin: 0.5vh 0;
+      flex: 0 0 auto;
+    }
+
+    #layout-container p {
+      margin: 1vh 0;  /* Reduced margin */
+      font-size: calc(12px + 0.3vw);
+    }
+
+    /* Layout options container */
+    .layout-options-container {
+      display: flex;
+      gap: 1.5vw;
+      justify-content: center;
+      padding: 1vh 0;
+    }
+
+    /* Layout images slightly smaller */
+    .layout-img {
+      width: 16vw;  /* Slightly reduced width */
+      /* max-width: 160px; */
+      min-width: 250px;
+      border: 2px solid transparent;
+    }
+
+    /* Layout option container */
+    .layout-option {
+      position: relative;
+      margin: 0 1vw;
+    }
+
+    /* Layout labels */
+    .layout-label {
+      position: absolute;
+      bottom: -3vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: calc(14px + 0.2vw);
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Keep other styles (hover, selected, etc.) the same */
+    .layout-img:hover {
+      border: 2px solid blue;
+    }
+
+    .layout-img.selected {
+      border: 2px solid green;
+    }
+
+    .layout-img.selected:hover {
+      border: 2px solid green;
+    }
+
+    .message-success {
+      background-color: #dff0d8;
+      color: #3c763d;
+      border: 1px solid #d6e9c6;
+    }
+
+    .message-error {
+      background-color: #f2dede;
+      color: #a94442;
+      border: 1px solid #ebccd1;
+    }
+
+    /* Button styles */
+    button {
+      display: inline-block;
+      padding: 0.5vh 2vw;
+      font-size: calc(12px + 0.3vw);
+      width: auto;  /* Let button width fit content */
+      min-width: min-content;
+      margin: 0 auto;  /* Center buttons */
+    }
+
+    .money-display {
+      position: absolute;
+      right: 2vw;
+      top: 2vh;
+      background-color: #f8f9fa;
+      padding: 1vh 1.5vw;
+      border-radius: 5px;
+      border: 1px solid #dee2e6;
+      text-align: right;
+      font-size: calc(12px + 0.3vw);
+    }
+
+    .money-item {
+      margin: 0.5vh 0;
+    }
+
+    .money-label {
+      font-weight: normal;
+      color: #495057;
+    }
+
+    .money-value {
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .bonus-value {
+      color: #007bff;
+    }
+
+    .layout-img.correct {
+      border: 3px solid #28a745 !important;  /* Green for correct */
+    }
+
+    .layout-img.incorrect {
+      border: 3px solid #dc3545 !important;  /* Red for incorrect */
+    }
+
+    .feedback-text {
+      text-align: center;
+      font-size: calc(14px + 0.3vw);
+      font-weight: bold;
+      margin: 1vh 0;
+    }
+
+    .feedback-correct {
+      color: #28a745;
+    }
+
+    .feedback-incorrect {
+      color: #dc3545;
+    }
+
+    #nextLayoutBtn {
+      display: none;  /* Hidden by default, shown after choice */
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 1vh 2vw;
+      border-radius: 5px;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 1vw;
+      justify-content: center;
+      margin: 1vh auto;
+    }
+
+    .welcome-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-size: calc(14px + 0.5vw);
+    }
+  </style>
+</head>
+<body>
+  <div id="jspsych-target"></div>
+
+  <script>
+    let viewIndex = 0;
+    let viewCost = 0.30;
+    let baseMoney = 1.00;
+    let maxBonus = 4.00;
+    let viewsTaken = 0;
+    let viewStartTime = 0;
+    let viewDurations = [];
+    let layoutData = [];
+
+    // Function to update money display
+    const updateMoneyDisplay = () => {
+      const currentBonus = (maxBonus - viewsTaken * viewCost).toFixed(2);
+      const moneyDisplay = document.querySelector('.money-display');
+      moneyDisplay.innerHTML = `
+        <div class="money-item">
+          <span class="money-label">Earned Money: </span>
+          <span class="money-value">€${totalEarned.toFixed(2)}</span>
+        </div>
+        <div class="money-item">
+          <span class="money-label">Potential Bonus: </span>
+          <span class="money-value bonus-value">+€${currentBonus}</span>
+        </div>
+      `;
+    };
+
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+      on_finish: function() {
+        // Remove this since we'll handle data in the trial
+        // const allData = {
+        //   totalEarned: totalEarned,
+        //   layouts: layoutData
+        // };
+        // jsPsych.data.addProperties(allData);
+        jsPsych.data.displayData();
+      }
+    });
+
+    /* create timeline */
+    var timeline = [];
+
+    // var preload = {
+    //   type: jsPsychPreload,
+    //   images: ["panorama/panorama3.png", "panorama/Equirectangular3.png"]
+    // };
+    // timeline.push(preload);
+
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `<div class="welcome-message">Welcome to the experiment. Press any key to begin.</div>`,
+      data: {
+        name: "Welcome message"
+      }
+    };
+    timeline.push(welcome);
+
+    // const panoramas = ["panorama/panorama3.png", "panorama/Equirectangular3.png"];
+
+    const renderPanorama = (image, container) => {
+      container.innerHTML = ""; // clear old pano
+      const pano = new PANOLENS.ImagePanorama(image);
+      const viewer = new PANOLENS.Viewer({ 
+        container, 
+        controlButtons: ["fullscreen"]
+      });
+      viewer.add(pano);
+
+      // Prevent mouse wheel from doing anything in the panorama
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { passive: false });
+
+      // Initialize viewing tracking
+      let viewedAngles = new Set();
+      const angleThreshold = 45; // Split the 360° view into 8 sections
+      const requiredSections = 8; // Require viewing at least 8 out of 8 sections
+      
+      // Disable Next View button initially
+      document.getElementById('nextViewBtn').disabled = true;
+
+      // Create circular progress indicator
+      const progressCircle = document.createElement('div');
+      progressCircle.style.position = 'absolute';
+      progressCircle.style.bottom = '20px';
+      progressCircle.style.right = '20px';
+      progressCircle.style.width = '60px';
+      progressCircle.style.height = '60px';
+      progressCircle.style.backgroundColor = 'rgba(0,0,0,0.7)';
+      progressCircle.style.borderRadius = '50%';
+      progressCircle.style.padding = '5px';
+      container.appendChild(progressCircle);
+
+      // Create sections
+      for (let i = 0; i < 8; i++) {
+        const section = document.createElement('div');
+        section.className = `section-${i}`;
+        section.style.position = 'absolute';
+        section.style.width = '50%';
+        section.style.height = '50%';
+        section.style.left = '25%';
+        section.style.top = '0';
+        section.style.transformOrigin = '50% 100%';
+        section.style.transform = `rotate(${-i * 45}deg)`;
+        section.style.clipPath = 'polygon(0 0, 100% 0, 50% 100%)';
+        section.style.backgroundColor = 'rgba(255,255,255,0.2)';
+        section.style.transition = 'background-color 0.3s';
+        progressCircle.appendChild(section);
+      }
+
+      // Add center dot
+      const centerDot = document.createElement('div');
+      centerDot.style.position = 'absolute';
+      centerDot.style.width = '10px';
+      centerDot.style.height = '10px';
+      centerDot.style.backgroundColor = 'white';
+      centerDot.style.borderRadius = '50%';
+      centerDot.style.left = '50%';
+      centerDot.style.top = '50%';
+      centerDot.style.transform = 'translate(-50%, -50%)';
+      progressCircle.appendChild(centerDot);
+
+      // Update sections based on viewed angles
+      const updateSections = () => {
+        viewedAngles.forEach(section => {
+          const sectionElement = progressCircle.querySelector(`.section-${section}`);
+          if (sectionElement) {
+            sectionElement.style.backgroundColor = 'rgba(40,167,69,0.8)'; // Green color
+          }
+        });
+
+        // Enable Next View button if enough sections have been viewed
+        if (viewedAngles.size >= requiredSections) {
+          document.getElementById('nextViewBtn').disabled = false;
+          document.getElementById('nextViewBtn').title = "You can now proceed to the next view";
+          progressCircle.style.boxShadow = '0 0 10px rgba(40,167,69,0.8)'; // Add glow effect when complete
+        }
+      };
+
+      // Track camera movement using OrbitControls change event
+      viewer.OrbitControls.addEventListener('change', () => {
+        const camera = viewer.getCamera();
+        const longitude = ((camera.rotation.y * (180/Math.PI)) + 360) % 360;
+        const section = Math.floor(longitude / angleThreshold);
+        viewedAngles.add(section);
+        updateSections();
+      });
+    };
+    
+    const layouts = [
+      {
+        panoramas: ["panorama/panorama3.png", "panorama/Equirectangular3.png"],
+        options: ["Layout_options/layout1.png", "Layout_options/layout2.png", "Layout_options/layout4.png"],
+        correctAnswer: "B",
+        maxBonus: 4.00
+      },
+      // Add more layouts here with their respective panoramas, options, and correct answers
+      {
+        panoramas: ["panorama/panorama2.png", "panorama/panorama3.png"],
+        options: ["Layout_options/layout3.png", "Layout_options/layout5.png", "Layout_options/layout2.png"],
+        correctAnswer: "A",
+        maxBonus: 4.00
+      }
+    ];
+
+    let currentLayoutIndex = 0;
+    let totalEarned = baseMoney;
+
+    const trial_combined = {
+      type: jsPsychHtmlButtonResponse,
+      data: {
+        name: "Experiment"
+      },
+      stimulus: `
+        <div style="height: 100vh; display: flex; flex-direction: column; gap: 1vh;">
+          <div class="money-display"></div>
+          <div id="panorama"></div>
+          <button id="nextViewBtn">Next View</button>
+          <div id="layout-container">
+            <p>Select the layout you think is correct:</p>
+            <div class="layout-options-container">
+              <!-- Layout options will be inserted here dynamically -->
+            </div>
+            <div class="feedback-text"></div>
+            <div id="message" class="message-container"></div>
+          </div>
+          <div class="button-container">
+            <button id="submitBtn">Submit Choice</button>
+            <button id="nextLayoutBtn" style="display: none;">Next Layout</button>
+          </div>
+        </div>
+      `,
+      choices: [], // No choices - we'll use our custom buttons
+      on_load: function() {
+        // Initialize view start time when the trial loads
+        viewStartTime = Date.now();
+        
+        // Initialize money display
+        updateMoneyDisplay();
+
+        // Initialize panorama
+        const panoDiv = document.getElementById('panorama');
+        renderPanorama(layouts[currentLayoutIndex].panoramas[viewIndex], panoDiv);
+
+        // Update layout options
+        const layoutOptionsContainer = document.querySelector('.layout-options-container');
+        layoutOptionsContainer.innerHTML = layouts[currentLayoutIndex].options.map((option, index) => {
+          const choice = String.fromCharCode(65 + index); // Convert 0,1,2 to A,B,C
+          return `
+            <div class="layout-option">
+              <img src="${option}" class="layout-img" data-choice="${choice}" />
+              <div class="layout-label">${choice}</div>
+            </div>
+          `;
+        }).join('');
+
+        // Setup layout selection
+        let selectedLayout = null;
+        document.querySelectorAll(".layout-img").forEach(img => {
+          img.addEventListener("click", function () {
+            // Hide confirmation message if it's showing
+            document.getElementById('message').style.display = "none";
+            
+            document.querySelectorAll(".layout-img").forEach(i => {
+              i.classList.remove('selected');  // Remove selected class from all images
+            });
+            this.classList.add('selected');    // Add selected class to clicked image
+            selectedLayout = this.getAttribute("data-choice");
+          });
+        });
+
+        // Modify Next View button handler
+        document.getElementById('nextViewBtn').addEventListener('click', () => {
+          // Hide confirmation message if it's showing
+          document.getElementById('message').style.display = "none";
+          
+          if (viewIndex < layouts[currentLayoutIndex].panoramas.length - 1) {
+            // Record duration of current view
+            const viewDuration = (Date.now() - viewStartTime) / 1000; // Convert to seconds
+            viewDurations.push(viewDuration);
+            
+            viewIndex++;
+            viewsTaken++;
+            renderPanorama(layouts[currentLayoutIndex].panoramas[viewIndex], panoDiv);
+            updateMoneyDisplay();
+            
+            // Start timing new view
+            viewStartTime = Date.now();
+          }
+        });
+
+        // Modify Submit button handler
+        document.getElementById('submitBtn').addEventListener('click', () => {
+          const selectedLayout = document.querySelector(".layout-img.selected")?.getAttribute("data-choice");
+          const messageDiv = document.getElementById('message');
+          const feedbackDiv = document.querySelector(".feedback-text");
+          const currentLayout = layouts[currentLayoutIndex];
+          
+          if (!selectedLayout) {
+            feedbackDiv.textContent = "Please select a layout first.";
+            feedbackDiv.className = "feedback-text feedback-incorrect";
+            return;
+          }
+
+          // Show confirmation message first
+          messageDiv.innerHTML = `
+            You selected layout ${selectedLayout}. Are you sure this is your final choice?<br>
+            <span style="display: block; margin-top: 10px; font-size: 0.9em; color: #007bff;">
+              If this is the correct answer, you will earn €${(maxBonus - viewsTaken * viewCost).toFixed(2)} bonus
+            </span>
+            <div class="confirm-buttons">
+              <button class="confirm-btn">Confirm</button>
+              <button class="cancel-btn">Cancel</button>
+            </div>
+          `;
+          messageDiv.className = "message-container message-success";
+          messageDiv.style.display = "block";
+
+          // Setup confirm button
+          messageDiv.querySelector('.confirm-btn').onclick = () => {
+            // Record duration of final view
+            const finalViewDuration = (Date.now() - viewStartTime) / 1000;
+            viewDurations.push(finalViewDuration);
+
+            // Record data for this layout
+            const layoutResult = {
+              layoutIndex: currentLayoutIndex + 1,
+              viewCount: viewsTaken + 1,
+              viewDurations: viewDurations,
+              totalTimeSpent: viewDurations.reduce((a, b) => a + b, 0),
+              selectedChoice: selectedLayout,
+              correctChoice: currentLayout.correctAnswer,
+              isCorrect: selectedLayout === currentLayout.correctAnswer,
+              earnedBonus: selectedLayout === currentLayout.correctAnswer ? (currentLayout.maxBonus - viewsTaken * viewCost) : 0
+            };
+            layoutData.push(layoutResult);
+
+            // Hide confirmation message
+            messageDiv.style.display = "none";
+
+            // Disable further selections and submit button
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextViewBtn').disabled = true;
+            document.querySelectorAll(".layout-img").forEach(img => {
+              img.style.pointerEvents = "none";
+            });
+
+            const isCorrect = selectedLayout === currentLayout.correctAnswer;
+            const earnedBonus = isCorrect ? (currentLayout.maxBonus - viewsTaken * viewCost) : 0;
+            totalEarned += earnedBonus;
+
+            // Show feedback
+            if (isCorrect) {
+              feedbackDiv.textContent = "Correct! Well done!";
+              feedbackDiv.className = "feedback-text feedback-correct";
+              document.querySelector(`.layout-img[data-choice="${selectedLayout}"]`).classList.add("correct");
+            } else {
+              feedbackDiv.textContent = `Incorrect. The correct layout is ${currentLayout.correctAnswer}.`;
+              feedbackDiv.className = "feedback-text feedback-incorrect";
+              document.querySelector(`.layout-img[data-choice="${selectedLayout}"]`).classList.add("incorrect");
+              document.querySelector(`.layout-img[data-choice="${currentLayout.correctAnswer}"]`).classList.add("correct");
+            }
+
+            // Update money display with zero potential bonus
+            const moneyDisplay = document.querySelector('.money-display');
+            moneyDisplay.innerHTML = `
+              <div class="money-item">
+                <span class="money-label">Earned Money: </span>
+                <span class="money-value">€${totalEarned.toFixed(2)}</span>
+              </div>
+              <div class="money-item">
+                <span class="money-label">Potential Bonus: </span>
+                <span class="money-value bonus-value">+€0.00</span>
+              </div>
+            `;
+
+            // Show next layout button if there are more layouts
+            if (currentLayoutIndex < layouts.length - 1) {
+              document.getElementById('nextLayoutBtn').style.display = 'block';
+              document.getElementById('nextLayoutBtn').textContent = 'Next Layout';
+              document.getElementById('nextLayoutBtn').onclick = () => {
+                currentLayoutIndex++;
+                viewIndex = 0;
+                viewsTaken = 0;
+                
+                // Reset the trial for the next layout
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('nextViewBtn').disabled = false;
+                document.querySelector(".feedback-text").textContent = "";
+                document.querySelectorAll(".layout-img").forEach(img => {
+                  img.style.pointerEvents = "auto";
+                  img.classList.remove("selected", "correct", "incorrect");
+                });
+                
+                // Update panorama and layout options for the new layout
+                renderPanorama(layouts[currentLayoutIndex].panoramas[0], document.getElementById('panorama'));
+                
+                // Update layout options for new layout
+                const layoutOptionsContainer = document.querySelector('.layout-options-container');
+                layoutOptionsContainer.innerHTML = layouts[currentLayoutIndex].options.map((option, index) => {
+                  const choice = String.fromCharCode(65 + index); // Convert 0,1,2 to A,B,C
+                  return `
+                    <div class="layout-option">
+                      <img src="${option}" class="layout-img" data-choice="${choice}" />
+                      <div class="layout-label">${choice}</div>
+                    </div>
+                  `;
+                }).join('');
+                
+                // Re-attach click handlers to new layout images
+                document.querySelectorAll(".layout-img").forEach(img => {
+                  img.addEventListener("click", function () {
+                    document.querySelectorAll(".layout-img").forEach(i => {
+                      i.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                  });
+                });
+                
+                // Update money display to show accumulated earnings and new potential bonus
+                updateMoneyDisplay();
+                
+                // Hide the next layout button
+                document.getElementById('nextLayoutBtn').style.display = 'none';
+
+                // When moving to next layout or finishing, reset the timing variables
+                viewDurations = [];
+                viewStartTime = Date.now();
+              };
+            } else {
+              document.getElementById('nextLayoutBtn').style.display = 'block';
+              document.getElementById('nextLayoutBtn').textContent = 'Finish Experiment';
+              document.getElementById('nextLayoutBtn').onclick = () => {
+                jsPsych.finishTrial(); // Remove the data object since we already recorded it
+              };
+            }
+          };
+
+          // Setup cancel button
+          messageDiv.querySelector('.cancel-btn').onclick = () => {
+            messageDiv.style.display = "none";
+          };
+        });
+      },
+      on_finish: function(data) {
+        // Add the layout data only to this trial's data
+        data.totalEarned = totalEarned;
+        data.layouts = layoutData;
+      }
+    };
+
+    timeline.push(trial_combined);
+
+    const debrief_block = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function () {
+        // Replace this with your actual Prolific completion URL
+        const prolificURL = "https://app.prolific.co/submissions/complete?cc=XXXXXXX";
+        
+        return `
+          <div class="welcome-message">
+            <h2>Thank you!</h2>
+            <p>Total earned: <strong>€${totalEarned.toFixed(2)}</strong></p>
+            <p>You will be redirected back to Prolific in <span id="countdown">10</span> seconds.</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">
+              If you are not redirected automatically, please click or copy this link:<br>
+              <a href="${prolificURL}" style="color: #007bff; text-decoration: underline;">${prolificURL}</a>
+            </p>
+          </div>
+        `;
+      },
+      on_load: function() {
+        let timeLeft = 10;
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdown = setInterval(function() {
+          timeLeft--;
+          countdownElement.textContent = timeLeft;
+          
+          if (timeLeft <= 0) {
+            clearInterval(countdown);
+            // Replace this URL with your actual Prolific completion URL
+            window.location.href = "https://app.prolific.co/submissions/complete?cc=XXXXXXX";
+          }
+        }, 1000);
+      },
+      choices: "NO_KEYS" // Disable key press responses
+    };
+    // timeline.push(debrief_block);
+
+
+    /* start the experiment */
+    jsPsych.run(timeline);
+
+
+  </script>
+</body>
+</html>
