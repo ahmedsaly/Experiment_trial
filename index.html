@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe@0.4"></script>
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r105/three.min.js"></script>
@@ -258,16 +259,17 @@
 
     /* initialize jsPsych */
     var jsPsych = initJsPsych({
-      on_finish: function() {
-        // Remove this since we'll handle data in the trial
-        // const allData = {
-        //   totalEarned: totalEarned,
-        //   layouts: layoutData
-        // };
-        // jsPsych.data.addProperties(allData);
-        jsPsych.data.displayData();
+      // on_finish: function() {
+      //   jsPsych.data.displayData();
+      // },
+      on_data_update: function(data) {
+        data.subject_id = subject_id;  // Add subject ID to all trials
       }
     });
+
+    // Generate a unique subject ID and filename (add this right after jsPsych initialization)
+    const subject_id = jsPsych.randomization.randomID(10);
+    const filename = `${subject_id}.csv`;
 
     /* create timeline */
     var timeline = [];
@@ -644,6 +646,18 @@
     };
 
     timeline.push(trial_combined);
+
+    // After your last trial (after trial_combined), add the save data trial:
+    const save_data = {
+      type: jsPsychPipe,
+      action: "save",
+      experiment_id: "WtGzR3nDrRcE",
+      filename: filename,
+      data_string: () => jsPsych.data.get().csv()
+    };
+
+    // Add the save_data trial to your timeline (before the debrief block)
+    timeline.push(save_data);  // Add this line to save the data
 
     const debrief_block = {
       type: jsPsychHtmlKeyboardResponse,
