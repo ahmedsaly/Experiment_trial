@@ -12,7 +12,8 @@
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
-  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe@0.4"></script>
+  <!-- <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe@0.4"></script> -->
+  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
 
   <!-- Three.js & Panolens -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r105/three.min.js"></script>
@@ -1437,9 +1438,6 @@
       action: "save",
       experiment_id: "WtGzR3nDrRcE",
       filename: filename,
-      version: "1.0.0",
-      data: {},
-      token: "gc1AmocgNeKHTu0dqml6J0O2FilCbyCvuHaMEHQM9c19AZOXT0wFqTcTHuCKC3Ome7IBDf",
       data_string: () => jsPsych.data.get().csv()
     };
 
@@ -1451,9 +1449,6 @@
       action: "save",
       experiment_id: "WtGzR3nDrRcE",
       filename: `layouts_${filename}`,
-      version: "1.0.0",
-      data: {},
-      token: "gc1AmocgNeKHTu0dqml6J0O2FilCbyCvuHaMEHQM9c19AZOXT0wFqTcTHuCKC3Ome7IBDf",
       data_string: () => {
         const headers = [
           "participant_id",
@@ -1487,7 +1482,6 @@
           layout.earnedBonus
         ].join(","));
 
-        console.log("Layout CSV:", [headers, ...rows].join("\n")); 
         return [headers, ...rows].join("\n");
       }
     };
@@ -1526,9 +1520,6 @@
       action: "save",
       experiment_id: "WtGzR3nDrRcE",
       filename: `logs_${filename}`,
-      version: "1.0.0",
-      data: {},
-      token: "gc1AmocgNeKHTu0dqml6J0O2FilCbyCvuHaMEHQM9c19AZOXT0wFqTcTHuCKC3Ome7IBDf",
       data_string: () => {
         const headers = [
           "participant_id",
