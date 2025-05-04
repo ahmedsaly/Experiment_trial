@@ -1481,6 +1481,7 @@
           layout.earnedBonus
         ].join(","));
 
+        console.log("Layout CSV:", [headers, ...rows].join("\n")); 
         return [headers, ...rows].join("\n");
       }
     };
