@@ -1483,7 +1483,6 @@
         ].join(","));
 
         const csv = [headers, ...rows].join("\n");
-        console.log("Layout CSV:", csv); // 👀 Check browser console
         return csv;
       }
     };
@@ -1531,7 +1530,7 @@
           "event_timestamp",
           "duration",
           "action_detail"
-        ].join(",");
+        ].join(";");
 
         const rows = logData.map(entry => [
           entry.participant_id,
@@ -1541,7 +1540,7 @@
           entry.event_timestamp,
           entry.duration.toFixed(3),
           JSON.stringify(entry.action_detail)
-        ].join(","));
+        ].join(";"));
 
         return [headers, ...rows].join("\n");
       }
@@ -1699,16 +1698,16 @@
       },
       choices: "NO_KEYS"
     };
-    // timeline.push(debrief_block);
+    timeline.push(debrief_block);
 
-    const goodbye = {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<p>Thank you! Data is being saved...</p>`,
-      choices: "NO_KEYS",
-      trial_duration: 5000 // 5-second delay
-    };
+    // const goodbye = {
+    //   type: jsPsychHtmlKeyboardResponse,
+    //   stimulus: `<p>Thank you! Data is being saved...</p>`,
+    //   choices: "NO_KEYS",
+    //   trial_duration: 5000 // 5-second delay
+    // };
 
-    timeline.push(goodbye);
+    // timeline.push(goodbye);
 
     /* start the experiment */
     jsPsych.run(timeline);
