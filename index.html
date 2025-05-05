@@ -1482,7 +1482,9 @@
           layout.earnedBonus
         ].join(","));
 
-        return [headers, ...rows].join("\n");
+        const csv = [headers, ...rows].join("\n");
+        console.log("Layout CSV:", csv); // 👀 Check browser console
+        return csv;
       }
     };
     // timeline.push(save_layout_data);
