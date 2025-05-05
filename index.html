@@ -1487,7 +1487,7 @@
         return csv;
       }
     };
-    // timeline.push(save_layout_data);
+    timeline.push(save_layout_data);
 
     const logAreaChange = (newArea) => {
       const now = Date.now();
@@ -1548,7 +1548,7 @@
     };
 
     // Add to timeline
-    // timeline.push(save_log_data);
+    timeline.push(save_log_data);
 
     // Add a display trial to show the layout data
     const display_layout_data = {
@@ -1708,7 +1708,7 @@
       trial_duration: 5000 // 5-second delay
     };
 
-    timeline.push(save_data, save_layout_data, save_log_data, goodbye);
+    timeline.push(goodbye);
 
     /* start the experiment */
     jsPsych.run(timeline);
